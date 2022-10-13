@@ -1,0 +1,13 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{CBC18FAF-4653-1946-49E2-DFB0F3B06076}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "Editor_Learning",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
