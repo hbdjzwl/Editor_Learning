@@ -9,6 +9,6 @@ public class Editor_LearningEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
-		ExtraModuleNames.AddRange( new string[] { "Editor_Learning" } );
+		ExtraModuleNames.AddRange( new string[] { "Editor_LearningEditor" } );
 	}
 }
