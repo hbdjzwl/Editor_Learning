@@ -2,18 +2,31 @@
 
 #include "MyAssetEditor.h"
 #include "MyAssetTypeActions.h"
+#include <IAssetTypeActions.h>
 #define LOCTEXT_NAMESPACE "FMyAssetEditorModule"
+
 
 void FMyAssetEditorModule::StartupModule()
 {
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked< FAssetToolsModule >("AssetTools").Get();
-	AssetTools.RegisterAssetTypeActions(MakeShareable(new FMyAssetTypeActions()));
+	TSharedRef<IAssetTypeActions> CustAssetAction = MakeShareable(new FMyAssetTypeActions());
+	RegisteredAssetTypeActions.Add(CustAssetAction);
+
+	AssetTools.RegisterAssetTypeActions(CustAssetAction);
 }
 
 void FMyAssetEditorModule::ShutdownModule()
 {
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
+	FAssetToolsModule* AssetToolsPtr = FModuleManager::GetModulePtr< FAssetToolsModule >("AssetTools");
+	if (AssetToolsPtr)
+	{
+		IAssetTools& AssetTools = AssetToolsPtr->Get();
+		for (auto& r : RegisteredAssetTypeActions)
+		{
+			AssetTools.UnregisterAssetTypeActions(r);
+		}
+	}
+
 }
 
 #undef LOCTEXT_NAMESPACE
