@@ -13,7 +13,7 @@ void FMyUICommandModule::CommandAAction()
 {
 	FMessageDialog::Open(EAppMsgType::Ok, FText::FromString("Execute CommandA"));
 }
-
+//Open new windows or tabs.
 
 
 void FMyUICommandModule::CommandBAction(FOnContentBrowserGetSelection GetSelectionDelegate)
@@ -38,21 +38,46 @@ void FMyUICommandModule::StartupModule()
 	//Register是TCommands的接口。用来注册命令，通常在模块的启动函数中调用。观察它的实现可看到内部调用了RegisterCommands函数。
 	FMyCustomCommands::Register();
 
-	//创建UICommandList
-	PluginCommandList = MakeShareable(new FUICommandList);
-	//为命令映射操作
-	PluginCommandList->MapAction(
-		FMyCustomCommands::Get().CommandA,
-		FExecuteAction::CreateRaw(this,&FMyUICommandModule::CommandAAction),
-		FCanExecuteAction());
+// 	//创建UICommandList
+// 	PluginCommandList = MakeShareable(new FUICommandList);
+// 	//为命令映射操作
+// 	PluginCommandList->MapAction(
+// 		FMyCustomCommands::Get().CommandA,
+// 		FExecuteAction::CreateRaw(this,&FMyUICommandModule::CommandAAction),
+// 		FCanExecuteAction());
 
 
-
+	//MainMenu.cpp 388
 
 	//获得关卡编辑器模块
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
-#if 1
+#if 0
+	TSharedPtr<FExtender>  a = LevelEditorModule.GetMenuExtensibilityManager()->GetAllExtenders();
+	LevelEditorMenuExtenderDelegates.Add(FAssetEditorExtender::CreateLambda([this](const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects)
+		{
+			//映射操作
+			CommandList->MapAction(
+				FMyCustomCommands::Get().CommandA,
+				FExecuteAction::CreateRaw(this, &FMyUICommandModule::CommandAAction),
+				FCanExecuteAction()
+			);
+			//添加菜单扩展
+			TSharedRef<FExtender> Extender(new FExtender());
+			Extender->AddMenuBarExtension(
+				"Help",
+				EExtensionHook::After,
+				CommandList,
+				FMenuBarExtensionDelegate::CreateLambda([](FMenuBarBuilder& MenuBarBuilder)
+					{
+						MenuBarBuilder.AddMenuEntry(FMyCustomCommands::Get().CommandA);
+					}));
+			return Extender;
+		}));
+#endif
+
+
+#if 0
 	//MenuBar 菜单栏
 	{
 		TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender);
@@ -60,17 +85,17 @@ void FMyUICommandModule::StartupModule()
 			"Help",
 			EExtensionHook::After,
 			PluginCommandList,
-			FMenuBarExtensionDelegate::CreateLambda([](FMenuBarBuilder& Builder)
+			FMenuBarExtensionDelegate::CreateLambda([](FMenuBarBuilder& MenuBarBuilder)
 				{
-					Builder.AddMenuEntry(FMyCustomCommands::Get().CommandA);
+					MenuBarBuilder.AddMenuEntry(FMyCustomCommands::Get().CommandA);
 				}
 			)
-		);
+		);//此处很奇怪GetMenu并不是GetMenuBar
 		LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
 }
 #endif
 
-#if 1
+#if 0
 	//Menu 菜单
 	{
 		TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender());
@@ -103,6 +128,9 @@ void FMyUICommandModule::StartupModule()
 
 	//获得内容浏览器模块
 	FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>(TEXT("ContentBrowser"));
+
+
+#if 0
 	//加入内容浏览器的命令
 	TArray<FContentBrowserCommandExtender>& CBCommandExtenderDelegates = ContentBrowserModule.GetAllContentBrowserCommandExtenders();
 	CBCommandExtenderDelegates.Add(FContentBrowserCommandExtender::CreateLambda([this](TSharedRef<FUICommandList> CommandList, FOnContentBrowserGetSelection GetSelectionDelegate)
@@ -115,7 +143,9 @@ void FMyUICommandModule::StartupModule()
 			);
 		}));
 
+#endif
 
+#if 0
 	//增加内容浏览器中Asset右键菜单
 	TArray<FContentBrowserMenuExtender_SelectedAssets>& CBAssetMenuExtenderDelegates = ContentBrowserModule.GetAllAssetViewContextMenuExtenders();
 	CBAssetMenuExtenderDelegates.Add(FContentBrowserMenuExtender_SelectedAssets::CreateLambda([](const TArray<FAssetData>& SelectedAssets)
@@ -133,32 +163,35 @@ void FMyUICommandModule::StartupModule()
 
 			return Extender;
 		}));
+#endif
 
 
-
-
+#if 0
 	//增加Asset编辑器中的菜单
-// 	TArray<FAssetEditorExtender>& AssetEditorMenuExtenderDelegates = FAssetEditorToolkit::GetSharedMenuExtensibilityManager()->GetExtenderDelegates();
-// 	AssetEditorMenuExtenderDelegates.Add(FAssetEditorExtender::CreateLambda([this](const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects)
-// 		{
-// 			//映射操作
-// 			CommandList->MapAction(
-// 				FMyCustomCommands::Get().CommandA,
-// 				FExecuteAction::CreateRaw(this, &FMyUICommandModule::CommandAAction),
-// 				FCanExecuteAction());
-// 			//添加菜单扩展
-// 			TSharedRef<FExtender> Extender(new FExtender());
-// 			Extender->AddMenuExtension(
-// 				"FindInContentBrowser",
-// 				EExtensionHook::After,
-// 				CommandList,
-// 				FMenuExtensionDelegate::CreateLambda([](FMenuBuilder& MenuBuilder)
-// 					{
-// 						MenuBuilder.AddMenuEntry(FMyCustomCommands::Get().CommandA);
-// 					}));
-// 			return Extender;
-// 		}));
+	TArray<FAssetEditorExtender>& AssetEditorMenuExtenderDelegates = FAssetEditorToolkit::GetSharedMenuExtensibilityManager()->GetExtenderDelegates();
+	AssetEditorMenuExtenderDelegates.Add(FAssetEditorExtender::CreateLambda([this](const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects)
+		{
+			//映射操作
+			CommandList->MapAction(
+				FMyCustomCommands::Get().CommandA,
+				FExecuteAction::CreateRaw(this, &FMyUICommandModule::CommandAAction),
+				FCanExecuteAction());
+			//添加菜单扩展
+			TSharedRef<FExtender> Extender(new FExtender());
+			Extender->AddMenuExtension(
+				"FindInContentBrowser",
+				EExtensionHook::After,
+				CommandList,
+				FMenuExtensionDelegate::CreateLambda([](FMenuBuilder& MenuBuilder)
+					{
+						MenuBuilder.AddMenuEntry(FMyCustomCommands::Get().CommandA);
+					}));
+			return Extender;
+		}));
+#endif
 
+#if 0
+	//增加ToolBar编辑器中的菜单
 	TArray<FAssetEditorExtender>& AssetEditorMenuExtenderDelegates1 = FAssetEditorToolkit::GetSharedToolBarExtensibilityManager()->GetExtenderDelegates();
 	AssetEditorMenuExtenderDelegates1.Add(FAssetEditorExtender::CreateLambda([this](const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects)
 		{
@@ -180,6 +213,7 @@ void FMyUICommandModule::StartupModule()
 					}));
 			return Extender;
 		}));
+#endif
 }
 
 void FMyUICommandModule::ShutdownModule()

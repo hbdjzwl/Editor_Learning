@@ -26,7 +26,6 @@ void FMyAssetEditorModule::ShutdownModule()
 			AssetTools.UnregisterAssetTypeActions(r);
 		}
 	}
-
 }
 
 #undef LOCTEXT_NAMESPACE

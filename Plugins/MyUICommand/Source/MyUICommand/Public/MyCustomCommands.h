@@ -12,6 +12,14 @@ public:
 	virtual void RegisterCommands() override;
 
 public:
+
+	//命令A
+	TSharedPtr< FUICommandInfo > LevelEditor_MenuBar_Command;
+
+	TSharedPtr< FUICommandInfo > LevelEditor_Menu_Command;
+
+	TSharedPtr< FUICommandInfo > LevelEditor_Toolbar_Command;
+
 	//命令A
 	TSharedPtr< FUICommandInfo > CommandA;
 
