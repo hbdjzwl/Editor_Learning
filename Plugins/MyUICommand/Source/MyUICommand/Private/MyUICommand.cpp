@@ -138,27 +138,48 @@ void FMyUICommandModule::StartupModule()
 
 
 	//增加Asset编辑器中的菜单
-	TArray<FAssetEditorExtender>& AssetEditorMenuExtenderDelegates = FAssetEditorToolkit::GetSharedMenuExtensibilityManager()->GetExtenderDelegates();
-	AssetEditorMenuExtenderDelegates.Add(FAssetEditorExtender::CreateLambda([this](const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects)
+// 	TArray<FAssetEditorExtender>& AssetEditorMenuExtenderDelegates = FAssetEditorToolkit::GetSharedMenuExtensibilityManager()->GetExtenderDelegates();
+// 	AssetEditorMenuExtenderDelegates.Add(FAssetEditorExtender::CreateLambda([this](const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects)
+// 		{
+// 			//映射操作
+// 			CommandList->MapAction(
+// 				FMyCustomCommands::Get().CommandA,
+// 				FExecuteAction::CreateRaw(this, &FMyUICommandModule::CommandAAction),
+// 				FCanExecuteAction());
+// 			//添加菜单扩展
+// 			TSharedRef<FExtender> Extender(new FExtender());
+// 			Extender->AddMenuExtension(
+// 				"FindInContentBrowser",
+// 				EExtensionHook::After,
+// 				CommandList,
+// 				FMenuExtensionDelegate::CreateLambda([](FMenuBuilder& MenuBuilder)
+// 					{
+// 						MenuBuilder.AddMenuEntry(FMyCustomCommands::Get().CommandA);
+// 					}));
+// 			return Extender;
+// 		}));
+
+	TArray<FAssetEditorExtender>& AssetEditorMenuExtenderDelegates1 = FAssetEditorToolkit::GetSharedToolBarExtensibilityManager()->GetExtenderDelegates();
+	AssetEditorMenuExtenderDelegates1.Add(FAssetEditorExtender::CreateLambda([this](const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects)
 		{
 			//映射操作
 			CommandList->MapAction(
-				FMyCustomCommands::Get().CommandA,
+				FMyCustomCommands::Get().CommandB,
 				FExecuteAction::CreateRaw(this, &FMyUICommandModule::CommandAAction),
 				FCanExecuteAction());
+
 			//添加菜单扩展
 			TSharedRef<FExtender> Extender(new FExtender());
-			Extender->AddMenuExtension(
-				"FindInContentBrowser",
+			Extender->AddToolBarExtension(
+				"Asset",
 				EExtensionHook::After,
 				CommandList,
-				FMenuExtensionDelegate::CreateLambda([](FMenuBuilder& MenuBuilder)
+				FToolBarExtensionDelegate::CreateLambda([](FToolBarBuilder& Builder)
 					{
-						MenuBuilder.AddMenuEntry(FMyCustomCommands::Get().CommandA);
+						Builder.AddToolBarButton(FMyCustomCommands::Get().CommandB);
 					}));
 			return Extender;
 		}));
-
 }
 
 void FMyUICommandModule::ShutdownModule()
