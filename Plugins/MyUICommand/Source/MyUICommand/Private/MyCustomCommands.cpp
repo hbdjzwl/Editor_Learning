@@ -1,4 +1,5 @@
 #include "MyCustomCommands.h"
+#include "MyStyle.h"
 #define LOCTEXT_NAMESPACE "FTestYaksueModule"
 
 FMyCustomCommands::FMyCustomCommands() 
@@ -6,9 +7,8 @@ FMyCustomCommands::FMyCustomCommands()
 		"MyCustomCommands",
 		NSLOCTEXT("Contexts", "MyCustomCommands", "MyCustomCommands Plugin"),
 		NAME_None,
-		FName(*FString("todo")
+		FMyStyle::GetStyleSetName()
 		)
-	)
 {
 }
 

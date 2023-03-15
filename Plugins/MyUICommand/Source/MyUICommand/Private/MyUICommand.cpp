@@ -6,14 +6,14 @@
 #include <LevelEditor.h>
 #include "Framework/MultiBox/MultiBoxExtender.h"
 #include <ContentBrowserModule.h>
-//#include "MultiBox/MultiBoxExtender.h"
+#include <MyStyle.h>
+
 #define LOCTEXT_NAMESPACE "FMyUICommandModule"
 
 void FMyUICommandModule::CommandAAction()
 {
 	FMessageDialog::Open(EAppMsgType::Ok, FText::FromString("Execute CommandA"));
 }
-//Open new windows or tabs.
 
 
 void FMyUICommandModule::CommandBAction(FOnContentBrowserGetSelection GetSelectionDelegate)
@@ -27,7 +27,9 @@ void FMyUICommandModule::CommandBAction(FOnContentBrowserGetSelection GetSelecti
 	//要显示的信息：
 	FString Message = "Execute CommandB:";
 	for (auto ad : SelectedAssets)
+	{
 		Message += ad.GetAsset()->GetName() + " ";
+	}
 	//显示对话框
 	FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(Message));
 }
@@ -35,49 +37,28 @@ void FMyUICommandModule::CommandBAction(FOnContentBrowserGetSelection GetSelecti
 
 void FMyUICommandModule::StartupModule()
 {
+
+	//初始化Style
+	FMyStyle::Initialize();
+	FMyStyle::ReloadTextures();
+
 	//Register是TCommands的接口。用来注册命令，通常在模块的启动函数中调用。观察它的实现可看到内部调用了RegisterCommands函数。
 	FMyCustomCommands::Register();
 
-// 	//创建UICommandList
-// 	PluginCommandList = MakeShareable(new FUICommandList);
-// 	//为命令映射操作
-// 	PluginCommandList->MapAction(
-// 		FMyCustomCommands::Get().CommandA,
-// 		FExecuteAction::CreateRaw(this,&FMyUICommandModule::CommandAAction),
-// 		FCanExecuteAction());
+	//创建UICommandList
+	PluginCommandList = MakeShareable(new FUICommandList);
+	//为命令映射操作
+	PluginCommandList->MapAction(
+		FMyCustomCommands::Get().CommandA,
+		FExecuteAction::CreateRaw(this,&FMyUICommandModule::CommandAAction),
+		FCanExecuteAction());
 
-
-	//MainMenu.cpp 388
 
 	//获得关卡编辑器模块
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
-#if 0
-	TSharedPtr<FExtender>  a = LevelEditorModule.GetMenuExtensibilityManager()->GetAllExtenders();
-	LevelEditorMenuExtenderDelegates.Add(FAssetEditorExtender::CreateLambda([this](const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects)
-		{
-			//映射操作
-			CommandList->MapAction(
-				FMyCustomCommands::Get().CommandA,
-				FExecuteAction::CreateRaw(this, &FMyUICommandModule::CommandAAction),
-				FCanExecuteAction()
-			);
-			//添加菜单扩展
-			TSharedRef<FExtender> Extender(new FExtender());
-			Extender->AddMenuBarExtension(
-				"Help",
-				EExtensionHook::After,
-				CommandList,
-				FMenuBarExtensionDelegate::CreateLambda([](FMenuBarBuilder& MenuBarBuilder)
-					{
-						MenuBarBuilder.AddMenuEntry(FMyCustomCommands::Get().CommandA);
-					}));
-			return Extender;
-		}));
-#endif
 
-
-#if 0
+#if 1
 	//MenuBar 菜单栏
 	{
 		TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender);
@@ -92,10 +73,10 @@ void FMyUICommandModule::StartupModule()
 			)
 		);//此处很奇怪GetMenu并不是GetMenuBar
 		LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
-}
+	}
 #endif
 
-#if 0
+#if 1
 	//Menu 菜单
 	{
 		TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender());
@@ -111,7 +92,7 @@ void FMyUICommandModule::StartupModule()
 #endif
 
 
-#if 0
+#if 1
 	//工具栏
 	{
 		TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender);

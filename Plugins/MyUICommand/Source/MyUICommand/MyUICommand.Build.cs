@@ -40,6 +40,7 @@ public class MyUICommand : ModuleRules
 				"SlateCore",
 				"InputCore",
 				"UnrealEd",
+				"Projects",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
