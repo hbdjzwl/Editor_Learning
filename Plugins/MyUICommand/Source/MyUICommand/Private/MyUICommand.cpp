@@ -35,28 +35,52 @@ void FMyUICommandModule::CommandBAction(FOnContentBrowserGetSelection GetSelecti
 }
 
 
+
+
+
 void FMyUICommandModule::StartupModule()
 {
-
-	//初始化Style
+	//初始化图标样式
 	FMyStyle::Initialize();
 	FMyStyle::ReloadTextures();
 
-	//Register是TCommands的接口。用来注册命令，通常在模块的启动函数中调用。观察它的实现可看到内部调用了RegisterCommands函数。
+
+	//用来调用FMyCustomCommand注册接口，内部调用了RegisterCommands函数。(通常在模块的启动函数中调用)
 	FMyCustomCommands::Register();
 
-	//创建UICommandList
+	//创建UICommandList，用于祖册
 	PluginCommandList = MakeShareable(new FUICommandList);
-	//为命令映射操作
+
+
+
+	//注册菜单栏的命令
 	PluginCommandList->MapAction(
-		FMyCustomCommands::Get().CommandA,
-		FExecuteAction::CreateRaw(this,&FMyUICommandModule::CommandAAction),
+		FMyCustomCommands::Get().LevelEditor_MenuBar_Command,
+		FExecuteAction::CreateLambda([]() {
+				FMessageDialog::Open(EAppMsgType::Ok, FText::FromString("Clicked Execute LevelEditor MenuBar"));
+			}),
 		FCanExecuteAction());
+
+	//注册菜单的命令
+ 	PluginCommandList->MapAction(
+		FMyCustomCommands::Get().LevelEditor_Menu_Command,
+		FExecuteAction::CreateLambda([]() {
+				FMessageDialog::Open(EAppMsgType::Ok, FText::FromString("Clicked Execute LevelEditor Menu"));
+			}),
+		FCanExecuteAction());
+
+	//注册工具栏命令
+	PluginCommandList->MapAction(
+		FMyCustomCommands::Get().LevelEditor_TooolBar_Command,
+		FExecuteAction::CreateLambda([]() {
+				FMessageDialog::Open(EAppMsgType::Ok, FText::FromString("Clicked Execute LevelEditor TooolBar"));
+			}),
+		FCanExecuteAction());
+
 
 
 	//获得关卡编辑器模块
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-
 
 #if 1
 	//MenuBar 菜单栏
@@ -68,7 +92,7 @@ void FMyUICommandModule::StartupModule()
 			PluginCommandList,
 			FMenuBarExtensionDelegate::CreateLambda([](FMenuBarBuilder& MenuBarBuilder)
 				{
-					MenuBarBuilder.AddMenuEntry(FMyCustomCommands::Get().CommandA);
+					MenuBarBuilder.AddMenuEntry(FMyCustomCommands::Get().LevelEditor_MenuBar_Command);
 				}
 			)
 		);//此处很奇怪GetMenu并不是GetMenuBar
@@ -80,12 +104,13 @@ void FMyUICommandModule::StartupModule()
 	//Menu 菜单
 	{
 		TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender());
-		MenuExtender->AddMenuExtension("LevelEditor"
-			, EExtensionHook::First
-			, PluginCommandList
-			, FMenuExtensionDelegate::CreateLambda([](FMenuBuilder& Builder)
+		MenuExtender->AddMenuExtension(
+			"LevelEditor",
+			EExtensionHook::First, 
+			PluginCommandList, 
+			FMenuExtensionDelegate::CreateLambda([](FMenuBuilder& Builder)
 				{
-					Builder.AddMenuEntry(FMyCustomCommands::Get().CommandA);
+					Builder.AddMenuEntry(FMyCustomCommands::Get().LevelEditor_Menu_Command);
 				}));
 		LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
 	}
@@ -93,7 +118,7 @@ void FMyUICommandModule::StartupModule()
 
 
 #if 1
-	//工具栏
+	//TooolBar 工具栏
 	{
 		TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender);
 		ToolbarExtender->AddToolBarExtension("Settings"
@@ -101,7 +126,7 @@ void FMyUICommandModule::StartupModule()
 			, PluginCommandList
 			, FToolBarExtensionDelegate::CreateLambda([](FToolBarBuilder& Builder)
 				{
-					Builder.AddToolBarButton(FMyCustomCommands::Get().CommandA);
+					Builder.AddToolBarButton(FMyCustomCommands::Get().LevelEditor_TooolBar_Command);
 				}));
 		LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
 	}
@@ -199,9 +224,8 @@ void FMyUICommandModule::StartupModule()
 
 void FMyUICommandModule::ShutdownModule()
 {
-	//Unregister是TCommands的接口。负责清理所有和这组命令相关的资源，通常在模块的关闭函数中被调用。
+	//Unregister是TCommands的接口,负责清理所有和这组命令相关的资源。(通常在模块的关闭函数中被调用)
 	FMyCustomCommands::Unregister();
-
 }
 
 #undef LOCTEXT_NAMESPACE

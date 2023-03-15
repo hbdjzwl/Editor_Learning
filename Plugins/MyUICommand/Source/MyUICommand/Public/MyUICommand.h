@@ -16,8 +16,8 @@ public:
 
 
 	void CommandAAction();
-
 	void CommandBAction(FOnContentBrowserGetSelection GetSelectionDelegate);
+
 
 	TSharedPtr<class FUICommandList> PluginCommandList;
 
