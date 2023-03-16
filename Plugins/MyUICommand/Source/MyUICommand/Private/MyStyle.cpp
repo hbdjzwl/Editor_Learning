@@ -41,8 +41,8 @@ TSharedRef< FSlateStyleSet > FMyStyle::Create()
 	Style->SetContentRoot(ResourcesPath);
 
 	//注册图标：类.命令
-	Style->Set("MyCustomCommands.CommandA", new IMAGE_BRUSH(TEXT("PicA"), Icon40x40));
-	Style->Set("MyCustomCommands.CommandB", new IMAGE_BRUSH(TEXT("PicB"), Icon40x40));
+	Style->Set("MyCustomCommands.LevelEditor_TooolBar_Command", new IMAGE_BRUSH(TEXT("PicA"), Icon40x40));
+	Style->Set("MyCustomCommands.AssetEditor_Menu_Command", new IMAGE_BRUSH(TEXT("PicB"), Icon40x40));
 
 	return Style;
 }
