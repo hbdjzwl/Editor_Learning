@@ -44,6 +44,8 @@ void FMyUICommandModule::ShutdownModule()
 {
 	//Unregister是TCommands的接口,负责清理所有和这组命令相关的资源。(通常在模块的关闭函数中被调用)
 	FMyCustomCommands::Unregister();
+
+	FMyStyle::Shutdown();
 }
 
 //辅助函数
@@ -166,6 +168,7 @@ void FMyUICommandModule::CreateLevelEditorWidget()
 //创建内容浏览器的UI、及快捷命令
 void FMyUICommandModule::CreateContentBrowserWidget()
 {
+
 	//获得内容浏览器模块
 	FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>(TEXT("ContentBrowser"));
 
