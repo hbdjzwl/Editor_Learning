@@ -8,6 +8,7 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "ToolMenus.h"
+#include <CustomEditorViewport.h>
 
 static const FName CustomPreviewViewportTabName("CustomPreviewViewport");
 
@@ -24,20 +25,21 @@ void FCustomPreviewViewportModule::StartupModule()
 	
 	PluginCommands = MakeShareable(new FUICommandList);
 
+	//点击会创建 CustomPreviewViewportTabName 名称的编辑区
 	PluginCommands->MapAction(
 		FCustomPreviewViewportCommands::Get().OpenPluginWindow,
 		FExecuteAction::CreateRaw(this, &FCustomPreviewViewportModule::PluginButtonClicked),
 		FCanExecuteAction());
 
 
-	//创建UI到工具栏里。
+	//创建UI到工具栏里。并创建一个默认的编辑器区域
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FCustomPreviewViewportModule::RegisterMenus));
 	
-	//感觉像是注册这个Tab名字CustomPreviewViewportTabName创建时的回调函数。用来设置名称。
+	//全局的Tab注册，当时CustomPreviewViewportTabName 名称创建时，会调用OnSpawnPluginTab()函数。
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(CustomPreviewViewportTabName, FOnSpawnTab::CreateRaw(this, &FCustomPreviewViewportModule::OnSpawnPluginTab))
-		.SetDisplayName(LOCTEXT("BBB", "BBB"))
+		.SetDisplayName(LOCTEXT("Custom Tab Name", "Custom Tab Name"))
 		.SetMenuType(ETabSpawnerMenuType::Hidden);
-
+	
 
 }
 
@@ -59,23 +61,11 @@ void FCustomPreviewViewportModule::ShutdownModule()
 
 TSharedRef<SDockTab> FCustomPreviewViewportModule::OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs)
 {
-	FText WidgetText = FText::Format(
-		LOCTEXT("WindowWidgetText", "Add code to {0} in {1} to override this window's contents"),
-		FText::FromString(TEXT("FCustomPreviewViewportModule::OnSpawnPluginTab")),
-		FText::FromString(TEXT("CustomPreviewViewport.cpp"))
-		);
-
 	return SNew(SDockTab)
 		.TabRole(ETabRole::NomadTab)
 		[
-			// Put your tab content here!
-			SNew(SBox)
-			.HAlign(HAlign_Center)
-			.VAlign(VAlign_Center)
-			[
-				SNew(STextBlock)
-				.Text(WidgetText)
-			]
+			// 此区域是创建视图窗口的地图。
+			SNew(SCustomEditorViewport)
 		];
 }
 
