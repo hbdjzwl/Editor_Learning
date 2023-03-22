@@ -25,21 +25,26 @@ TSharedRef<FEditorViewportClient> SCustomEditorViewport::MakeEditorViewportClien
 
 TSharedPtr<SWidget> SCustomEditorViewport::MakeViewportToolbar()
 {
-	return SNew(SStaticMeshEditorViewportToolbar, SharedThis(this));
+	//创建通用编辑器视图工具栏，但是SCommonEditorViewportToolbarBase()构造函数需要一个TSharedPtr<class ICommonEditorViewportToolbarInfoProvider>参数。
+	//所以该类会继承ICommonEditorViewportToolbarInfoProvider;
+	return SNew(SCommonEditorViewportToolbarBase, SharedThis(this));
 }
 
 
+//ICommonEditorViewportToolbarInfoProvider 抽象接口
 TSharedRef<class SEditorViewport> SCustomEditorViewport::GetViewportWidget()
 {
 	return SharedThis(this);
 }
 
+//ICommonEditorViewportToolbarInfoProvider 抽象接口
 TSharedPtr<FExtender> SCustomEditorViewport::GetExtenders() const
 {
 	TSharedPtr<FExtender> Result(MakeShareable(new FExtender));
 	return Result;
 }
 
+//ICommonEditorViewportToolbarInfoProvider 抽象接口
 void SCustomEditorViewport::OnFloatingButtonClicked()
 {
 }
