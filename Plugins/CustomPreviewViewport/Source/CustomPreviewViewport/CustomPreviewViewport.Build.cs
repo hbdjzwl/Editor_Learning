@@ -42,6 +42,7 @@ public class CustomPreviewViewport : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"StaticMeshEditor",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
