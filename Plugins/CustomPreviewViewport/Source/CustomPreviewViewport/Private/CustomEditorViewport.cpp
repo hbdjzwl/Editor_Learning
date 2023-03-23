@@ -15,8 +15,20 @@ SCustomEditorViewport::~SCustomEditorViewport()
 
 TSharedRef<FEditorViewportClient> SCustomEditorViewport::MakeEditorViewportClient()
 {
-	//使用自己的预览空间
+	//使用自己的预览空间对象
 	PreviewScene = MakeShareable(new FPreviewScene());
+
+	//向预览场景中加一个测试模型
+	{
+		//读取模型
+		UStaticMesh* SM = LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'"), NULL, LOAD_None, NULL);
+		//创建组件
+		UStaticMeshComponent* SMC = NewObject<UStaticMeshComponent>();
+		SMC->SetStaticMesh(SM);
+		//向预览场景中增加组件
+		PreviewScene->AddComponent(SMC, FTransform::Identity);
+	}
+
 
 	TSharedPtr<FEditorViewportClient> EditorViewportClient = MakeShareable(new FEditorViewportClient(nullptr, PreviewScene.Get()));
 
