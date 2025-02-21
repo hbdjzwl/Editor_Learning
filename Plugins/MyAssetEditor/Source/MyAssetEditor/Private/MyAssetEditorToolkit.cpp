@@ -30,13 +30,12 @@ FLinearColor FMyAssetEditorToolkit::GetWorldCentricTabColorScale() const
 
 TSharedRef<SDockTab> FMyAssetEditorToolkit::SpawnTestTab(const FSpawnTabArgs& Args)
 {
-	return
-		SNew(SDockTab)
+	return SNew(SDockTab)
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot().AutoHeight()
 			[
-				SNew(STextBlock)
+				SAssignNew(NumberText,STextBlock)
 				.Text(FText::FromString(FString::FromInt(EditingAsset->TestData)))
 			]
 			+ SVerticalBox::Slot().AutoHeight()
@@ -46,6 +45,7 @@ TSharedRef<SDockTab> FMyAssetEditorToolkit::SpawnTestTab(const FSpawnTabArgs& Ar
 				.OnClicked_Lambda([this]() 
 				{
 					EditingAsset->TestData++; 
+					NumberText->SetText(FText::FromString(FString::FromInt(EditingAsset->TestData)));
 					return FReply::Handled();
 				})
 			]
@@ -74,21 +74,34 @@ void FMyAssetEditorToolkit::Initialize(const EToolkitMode::Type Mode, const TSha
 	TSharedRef<FTabManager::FLayout> Layout = FTabManager::NewLayout("MyAssetEditorToolkit_Layout")
 		->AddArea
 		(
-			FTabManager::NewPrimaryArea()->SetOrientation(Orient_Vertical)
+			FTabManager::NewPrimaryArea()//创建一个FArea
 			->Split
 			(
-				FTabManager::NewSplitter()->SetOrientation(Orient_Horizontal)->SetSizeCoefficient(0.9f)
+				FTabManager::NewStack()	////创建一个FStack继承自FLayoutNode
+				->SetSizeCoefficient(0.7f)
+				->AddTab(FName("TestTab"), ETabState::OpenedTab)
+			)
+#if 0
+	//抄的其它文章的，但是效果和上面一个样
+			FTabManager::NewPrimaryArea()	//创建一个FArea
+			->SetOrientation(Orient_Vertical)
+			->Split
+			(
+				FTabManager::NewSplitter()		//创建一个FSplitter继承自FLayoutNode
+				->SetOrientation(Orient_Horizontal)
+				->SetSizeCoefficient(0.9f)
 				->Split
 				(
-					FTabManager::NewStack()
+					FTabManager::NewStack()			//创建一个FStack继承自FLayoutNode
 					->SetSizeCoefficient(0.7f)
 					->AddTab(FName("MyTabID"), ETabState::OpenedTab)
 				)
 			)
+#endif
 		);
 
-	const bool bCreateDefaultStandaloneMenu = true;
-	const bool bCreateDefaultToolbar = true;
+	const bool bCreateDefaultStandaloneMenu = true;	// 创建菜单栏
+	const bool bCreateDefaultToolbar = true;	// 工具栏ToolBar
 	const FName AppIdentifier = TEXT("MyAssetEditor");
 	FAssetEditorToolkit::InitAssetEditor(Mode, InitToolkitHost, AppIdentifier, Layout, bCreateDefaultStandaloneMenu, bCreateDefaultToolbar, Asset);
 }

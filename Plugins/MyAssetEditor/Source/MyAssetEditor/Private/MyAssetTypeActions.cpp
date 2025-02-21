@@ -27,7 +27,7 @@ FText FMyAssetTypeActions::GetAssetDescription(const struct FAssetData& AssetDat
 
 bool FMyAssetTypeActions::CanFilter()
 {
-	return false;
+	return true;
 }
 
 //Asset的UObject是什么
@@ -45,7 +45,6 @@ void FMyAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSh
 		auto Asset = Cast<UMyAsset>(*ObjIt);
 		if (Asset != NULL)
 		{
-			//
 			TSharedRef<FMyAssetEditorToolkit> NewToolkit(new FMyAssetEditorToolkit());
 			NewToolkit->Initialize(Mode, EditWithinLevelEditor, Asset);
 		}
