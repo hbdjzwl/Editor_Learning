@@ -100,27 +100,30 @@ void FFSMAssetEditor::InitializeAssetEditor(const EToolkitMode::Type Mode, const
 		RemoveToolbarExtender(FSMToolbarExtender);
 		FSMToolbarExtender.Reset();
 	}
-
 	FSMToolbarExtender = MakeShareable(new FExtender);
-
 	FSMToolbarExtender->AddToolBarExtension(
 		"Asset",
 		EExtensionHook::After,
 		GetToolkitCommands(),
-		FToolBarExtensionDelegate::CreateLambda([](FToolBarBuilder& InToolbarBuilder)
+		FToolBarExtensionDelegate::CreateLambda([this](FToolBarBuilder& InToolbarBuilder)
 		{
  			InToolbarBuilder.BeginSection("Toolbar");
 			{
+				//扩展一个按钮
 				InToolbarBuilder.AddToolBarButton(FSuperManagerUICommands::Get().UnlockActorSelection);
+				//扩展一个SWidget
+				InToolbarBuilder.AddWidget(CreateDebugWidget());
+
  			}
  			InToolbarBuilder.EndSection();
 		
 		})
 	);
 
+
 	//FAssetEditorToolkit父类的函数
 	AddToolbarExtender(FSMToolbarExtender);
-	//抄袭FFlipbookEditor
+	//不调用RegenerateMenusAndToolbars函数则不会刷新ToolBar界面，也就不显示。
 	RegenerateMenusAndToolbars();
 }
 
@@ -414,6 +417,88 @@ UEdGraphNode * FFSMAssetEditor::GetFirstSelectedNode() const
 		return nullptr;
 	}
 	return Cast<UEdGraphNode>(SelectedNodes[FSetElementId::FromInteger(0)]);
+}
+
+TSharedRef<SWidget> FFSMAssetEditor::CreateDebugWidget()
+{
+	{
+		DebugObjectsComboBox = SNew(SComboBox<TSharedPtr<FString>>)
+		.OptionsSource(&DebugComboBoxSourceItems)
+		.OnComboBoxOpening(this,&FFSMAssetEditor::DebugOnComboBoxOpening)	//每次打开这个ComboBox时触发。在OnGenerateWidget之前。
+		.OnGenerateWidget(this, &FFSMAssetEditor::GenerateContentInDebugComboBox)	//遍历OptionsSource的数据源，对应生成每一行S，但是每一行的具体Slate形式还是自己去创建
+		.OnSelectionChanged(this,&FFSMAssetEditor::DebugOnComboSelectionChanged)
+		[
+			SAssignNew(DebugDiplayText, STextBlock)
+			.Text(FText::FromString(TEXT("No debug object selected")))	//将默认未选择的提示语跟DebugComboBoxSourceItems[0]设一样，因为SetSelectedItem(0)我们是放在OnComboBoxOpening里调用的，慢了一拍
+		];
+	}
+
+
+	TSharedRef<SWidget> DebugObjectSelectionWidget =
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		.AutoWidth()
+		[
+			DebugObjectsComboBox.ToSharedRef()
+		]
+		+ SHorizontalBox::Slot()
+		.AutoWidth()
+		.HAlign(HAlign_Right)
+		.VAlign(VAlign_Center)
+		.Padding(2.0f);
+
+
+	return SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.VAlign(VAlign_Bottom)
+		[
+			DebugObjectSelectionWidget
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.HAlign(HAlign_Center)
+		.Padding(2.0f)
+		[
+			SNew(STextBlock)
+			.Text(LOCTEXT("DebugSelectTitle", "Debug Filter"))
+		];
+	
+}
+
+void FFSMAssetEditor::DebugOnComboBoxOpening()
+{
+	// 判断上一次的选择是有效的，
+	if (LastSelectDebugItem.IsValid() && DebugComboBoxSourceItems.Contains(LastSelectDebugItem))
+	{
+		DebugObjectsComboBox->SetSelectedItem(LastSelectDebugItem.Pin());
+	}
+	else
+	{
+		DebugComboBoxSourceItems.Empty();
+		DebugComboBoxSourceItems.Add(MakeShared<FString>("No debug object selected"));
+		DebugComboBoxSourceItems.Add(MakeShared<FString>("A"));
+		DebugComboBoxSourceItems.Add(MakeShared<FString>("B"));
+
+		//可以由某些条件然后设置为新增的某个选项，有点相当于每次打开默认都是
+		DebugObjectsComboBox->SetSelectedItem(DebugComboBoxSourceItems[0]);
+	}
+}
+
+TSharedRef<SWidget> FFSMAssetEditor::GenerateContentInDebugComboBox(TSharedPtr<FString> SourceItem)
+{
+	TSharedRef <STextBlock> ContructedComboText = SNew(STextBlock)
+		.Text(FText::FromString(*SourceItem.Get()));
+
+	return ContructedComboText;
+}
+
+void FFSMAssetEditor::DebugOnComboSelectionChanged(TSharedPtr<FString> SelectedOption, ESelectInfo::Type InSelectInfo)
+{
+	DebugDiplayText->SetText(FText::FromString(*SelectedOption.Get()));
+	LastSelectDebugItem = SelectedOption;	//缓存上次的选择
+
+	//UE_LOG(LogTemp,Warning, TEXT("%s"), **LastSelectDebugItem.Pin());
 }
 
 void FFSMAssetEditor::RegisterTabSpawners(const TSharedRef<FTabManager>& InTabManager)

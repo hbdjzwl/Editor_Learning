@@ -243,8 +243,8 @@ void FMyUICommandModule::CreateAssetWidgetAndRegisterAssetCommand()
 		}));
 #endif
 
-#if 1
-	//增加ToolBar编辑器中的菜单
+#if 0
+	//所有资产里，增加ToolBar编辑器中的菜单，如果要针对某个资产扩展ToolBar，参考FSMAssetEditor.cpp里
 	TArray<FAssetEditorExtender>& AssetEditorMenuExtenderDelegates1 = FAssetEditorToolkit::GetSharedToolBarExtensibilityManager()->GetExtenderDelegates();
 	AssetEditorMenuExtenderDelegates1.Add(FAssetEditorExtender::CreateLambda([this](const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects)
 		{

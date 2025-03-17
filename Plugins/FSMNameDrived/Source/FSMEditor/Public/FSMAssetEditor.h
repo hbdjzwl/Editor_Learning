@@ -59,7 +59,20 @@ private:
 
 	FGraphPanelSelectionSet GetSelectedNodes() const;
 	UEdGraphNode* GetFirstSelectedNode() const;
+
+
+	//扩展Toolbar的Debug框
+	TSharedRef<SWidget> CreateDebugWidget();
+	void DebugOnComboBoxOpening();
+	TSharedRef<SWidget> GenerateContentInDebugComboBox(TSharedPtr<FString> SourceItem);	//创建没一行的Slot
+	void DebugOnComboSelectionChanged(TSharedPtr<FString> SelectedOption, ESelectInfo::Type InSelectInfo);
+	TArray<TSharedPtr<FString>> DebugComboBoxSourceItems;	//数据源
+	TSharedPtr<SComboBox<TSharedPtr<FString>>> DebugObjectsComboBox;	//Debug的ComboBox
+	TSharedPtr<STextBlock> DebugDiplayText;	//那个当前框里显示的内容
+	TWeakPtr<FString> LastSelectDebugItem;	//存上次的选项，防止每次打开重新创建数据源，及保留上次选择项
 private:
+
+
 	TSharedPtr<class SGraphEditor> GraphEditorView;
 
 	class UFSM* TargetFSM;
@@ -67,7 +80,7 @@ private:
 	/** Command list for the graph editor */
 	TSharedPtr<class FUICommandList> GraphEditorCommands;
 	TSharedPtr<FUICommandInfo> LevelSnapshotsSettings;
-
+	TUniquePtr<int32> a;
 private:
 
 	/** Toolbar extender */
